@@ -1,0 +1,49 @@
+{
+  "name": "pi-agent-cmux",
+  "version": "0.1.0",
+  "description": "cmux integration for the pi coding agent",
+  "keywords": [
+    "pi-package",
+    "pi-extension",
+    "cmux"
+  ],
+  "type": "module",
+  "pi": {
+    "extensions": [
+      "./src/index.ts"
+    ]
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/stegmannb/pi-agent-cmux.git"
+  },
+  "author": "Bastian Stegmann",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/stegmannb/pi-agent-cmux/issues"
+  },
+  "homepage": "https://github.com/stegmannb/pi-agent-cmux",
+  "scripts": {
+    "fmt": "oxfmt src/index.ts",
+    "lint": "oxlint src/index.ts",
+    "check": "tsc --noEmit",
+    "ci:fmt": "oxfmt --check src/index.ts",
+    "ci:lint": "pnpm run lint",
+    "ci:check": "pnpm run check"
+  },
+  "peerDependencies": {
+    "@mariozechner/pi-coding-agent": "^0.72.0"
+  },
+  "peerDependenciesMeta": {
+    "@mariozechner/pi-coding-agent": {
+      "optional": true
+    }
+  },
+  "devDependencies": {
+    "@mariozechner/pi-coding-agent": "^0.72.1",
+    "@types/node": "^24",
+    "oxfmt": "^0.33.0",
+    "oxlint": "^1.0.0",
+    "typescript": "^5"
+  }
+}
