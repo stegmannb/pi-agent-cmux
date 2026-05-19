@@ -24,10 +24,10 @@
   },
   "homepage": "https://github.com/stegmannb/pi-agent-cmux",
   "scripts": {
-    "fmt": "oxfmt src/index.ts",
-    "lint": "oxlint src/index.ts",
+    "fmt": "oxfmt src/",
+    "lint": "oxlint src/",
     "check": "tsc --noEmit",
-    "ci:fmt": "oxfmt --check src/index.ts",
+    "ci:fmt": "oxfmt --check src/",
     "ci:lint": "pnpm run lint",
     "ci:check": "pnpm run check"
   },
