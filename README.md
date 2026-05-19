@@ -14,16 +14,30 @@ Tracks each agent run and builds a context-aware notification:
 - **Finished in 45s** — when the run exceeded the duration threshold
 - **Error** — when the agent encountered an error
 
+If cmux is not found in the path, the extension disables itself silently.
+
 ## Configuration
 
-| Variable | Default | Description |
-|---|---|---|
-| `PI_CMUX_NOTIFY_LEVEL` | `all` | `all` / `medium` (Task Complete + Error) / `low` (Error only) / `disabled` |
-| `PI_CMUX_NOTIFY_THRESHOLD_MS` | `15000` | Duration (ms) above which timing is included in the body |
-| `PI_CMUX_NOTIFY_TITLE` | `Pi` | Notification title |
-| `CMUX_BINARY` | `cmux` | Path to the cmux binary |
+Settings are read from the `cmux` key in pi's `settings.json`
+(`$PI_CODING_AGENT_DIR/settings.json`):
 
-If cmux is not found, the extension disables itself silently.
+```json
+{
+  "cmux": {
+    "notifyLevel": "all",
+    "thresholdMs": 15000,
+    "title": "Pi"
+  }
+}
+```
+
+| Key | Default | Description |
+|---|---|---|
+| `notifyLevel` | `"all"` | `"all"` / `"medium"` (Task Complete + Error) / `"low"` (Error only) / `"disabled"` |
+| `thresholdMs` | `15000` | Duration (ms) above which elapsed time is appended to the body |
+| `title` | `"Pi"` | Notification title shown in cmux |
+
+The cmux binary path can be overridden via the `CMUX_BINARY` environment variable.
 
 ## Installation
 
@@ -37,6 +51,15 @@ inputs.pi-agent-cmux.url = "github:stegmannb/pi-agent-cmux";
 "extensions/cmux/index.ts".text = ''
   export { default } from "${inputs.pi-agent-cmux.packages.${system}.default}/src/index.ts";
 '';
+
+# To configure via settings.json:
+"settings.json".text = builtins.toJSON {
+  cmux = {
+    notifyLevel = "medium";
+    thresholdMs = 10000;
+    title = "Pi";
+  };
+};
 ```
 
 ### Manual
@@ -44,7 +67,7 @@ inputs.pi-agent-cmux.url = "github:stegmannb/pi-agent-cmux";
 ```bash
 # In your pi extensions directory
 mkdir -p ~/.pi/agent/extensions/cmux
-cp src/index.ts ~/.pi/agent/extensions/cmux/
+cp src/*.ts ~/.pi/agent/extensions/cmux/
 ```
 
 ## Development
