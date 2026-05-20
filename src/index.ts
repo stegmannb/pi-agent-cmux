@@ -1,6 +1,7 @@
 import type { ExtensionAPI } from "@mariozechner/pi-coding-agent";
 import { loadConfig } from "./config.ts";
 import { buildNotification, isNotifiable } from "./notify.ts";
+import { CmuxSidebar } from "./sidebar.ts";
 import { applyToolResult, emptyStats } from "./tracker.ts";
 import type { RunStats } from "./tracker.ts";
 
@@ -18,6 +19,8 @@ export default function (pi: ExtensionAPI): void {
 
   // Permanently disabled once we confirm cmux is not available.
   let cmuxMissing = false;
+
+  const sidebar = new CmuxSidebar(pi.exec.bind(pi), config);
 
   async function sendNotification(subtitle: string, body: string): Promise<void> {
     if (cmuxMissing) return;
@@ -38,6 +41,7 @@ export default function (pi: ExtensionAPI): void {
       const stderr = result.stderr.trim();
       if (stderr.includes("not found") || stderr.includes("ENOENT")) {
         cmuxMissing = true;
+        sidebar.markMissing();
       }
       return;
     }
@@ -48,6 +52,28 @@ export default function (pi: ExtensionAPI): void {
 
   pi.on("agent_start", () => {
     stats = emptyStats();
+    sidebar.clearAll();
+  });
+
+  pi.on("message_update", (event) => {
+    const ae = event.assistantMessageEvent;
+    if (ae.type === "thinking_start") {
+      sidebar.startThinking();
+    } else if (ae.type === "thinking_end") {
+      sidebar.stopThinking();
+    }
+  });
+
+  pi.on("tool_execution_start", (event) => {
+    sidebar.startTool(event.toolCallId, event.toolName, event.args as Record<string, unknown>);
+  });
+
+  pi.on("tool_execution_end", (event) => {
+    sidebar.stopTool(event.toolCallId, event.toolName);
+  });
+
+  pi.on("turn_end", () => {
+    sidebar.clearAll();
   });
 
   pi.on("tool_result", (event) => {

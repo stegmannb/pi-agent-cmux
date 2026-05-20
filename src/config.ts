@@ -31,6 +31,10 @@ export interface Config {
   readonly title: string;
   /** Path to the cmux binary — set via CMUX_BINARY env var. */
   readonly cmuxBinary: string;
+  /** Whether to update the cmux sidebar with live activity status pills. */
+  readonly sidebarEnabled: boolean;
+  /** Minimum ms a tool/think must run before a status pill appears (reduces noise). */
+  readonly sidebarThresholdMs: number;
 }
 
 // ---------------------------------------------------------------------------
@@ -42,6 +46,8 @@ const DEFAULTS = {
   thresholdMs: 15_000,
   title: "Pi",
   cmuxBinary: "cmux",
+  sidebarEnabled: true,
+  sidebarThresholdMs: 2_000,
 } satisfies Config;
 
 // ---------------------------------------------------------------------------
@@ -95,5 +101,7 @@ export function loadConfig(): Config {
     cmuxBinary: isNonEmptyString(process.env["CMUX_BINARY"])
       ? (process.env["CMUX_BINARY"] as string)
       : DEFAULTS.cmuxBinary,
+    sidebarEnabled: typeof s["sidebarEnabled"] === "boolean" ? s["sidebarEnabled"] : DEFAULTS.sidebarEnabled,
+    sidebarThresholdMs: isPositiveNumber(s["sidebarThresholdMs"]) ? s["sidebarThresholdMs"] : DEFAULTS.sidebarThresholdMs,
   };
 }
