@@ -114,19 +114,25 @@ function formatDuration(ms: number): string {
 // ---------------------------------------------------------------------------
 
 const EXEC_TIMEOUT_MS = 3_000;
-const THINKING_KEY = "pi-think";
+
+// Unique 4-char ID for this extension instance. Namespaces all cmux keys so
+// multiple pi instances in the same workspace don't collide or clear each
+// other's pills.
+const INSTANCE_ID = Math.random().toString(36).slice(2, 6);
 
 export class CmuxSidebar {
   private readonly exec: Exec;
   private readonly config: Config;
   private readonly tasks = new Map<string, ActiveTask>();
-  /**
-   * Every key for which cmux set-status has actually been called.
-   * Used by clearAll() to guarantee cleanup even when task map is stale.
-   */
   private readonly activeKeys = new Set<string>();
   private cmuxMissing = false;
   private thinkingStartedAt: number | undefined;
+
+  private readonly thinkingKey = `pi-think-${INSTANCE_ID}`;
+
+  private toolKey(toolCallId: string): string {
+    return `pi-tool-${INSTANCE_ID}-${toolCallId}`;
+  }
 
   constructor(exec: Exec, config: Config) {
     this.exec = exec;
@@ -145,7 +151,7 @@ export class CmuxSidebar {
   startMessage(): void {
     if (!this.config.sidebarEnabled) return;
     this.thinkingStartedAt = Date.now();
-    this.scheduleTask(THINKING_KEY, "💭 Generating…", "#f59e0b");
+    this.scheduleTask(this.thinkingKey, "💭 Generating…", "#f59e0b");
   }
 
   /**
@@ -154,12 +160,12 @@ export class CmuxSidebar {
    */
   upgradeToThinking(): void {
     if (!this.config.sidebarEnabled) return;
-    const task = this.tasks.get(THINKING_KEY);
+    const task = this.tasks.get(this.thinkingKey);
     if (!task) return;
     // Update label so future set-status calls use the new text.
     (task as { label: string }).label = "🧠 Thinking…";
     if (task.visible) {
-      void this.cmuxSetStatus(THINKING_KEY, "🧠 Thinking…", "#f59e0b");
+      void this.cmuxSetStatus(this.thinkingKey, "🧠 Thinking…", "#f59e0b");
     }
   }
 
@@ -171,12 +177,12 @@ export class CmuxSidebar {
     const startedAt = this.thinkingStartedAt;
     this.thinkingStartedAt = undefined;
 
-    const task = this.tasks.get(THINKING_KEY);
+    const task = this.tasks.get(this.thinkingKey);
     if (!task) return;
 
     const elapsed = startedAt !== undefined ? Date.now() - startedAt : undefined;
     const wasVisible = task.visible;
-    this.cancelTask(THINKING_KEY);
+    this.cancelTask(this.thinkingKey);
 
     if (wasVisible && elapsed !== undefined) {
       void this.cmuxLog("progress", "llm", `${task.label.replace("…", "")} ${formatDuration(elapsed)}`);
@@ -190,7 +196,7 @@ export class CmuxSidebar {
       const cmd = typeof args["command"] === "string" ? args["command"] : "";
       if (isCdOnlyCommand(cmd)) return;
     }
-    const key = `pi-tool-${toolCallId}`;
+    const key = this.toolKey(toolCallId);
     const label = formatToolLabel(toolName, args);
     const color = toolColor(toolName);
     this.scheduleTask(key, label, color);
@@ -198,7 +204,7 @@ export class CmuxSidebar {
 
   stopTool(toolCallId: string, toolName: string): void {
     if (!this.config.sidebarEnabled) return;
-    const key = `pi-tool-${toolCallId}`;
+    const key = this.toolKey(toolCallId);
     const task = this.tasks.get(key);
     if (!task) return;
 
