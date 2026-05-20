@@ -45,6 +45,7 @@ stdenv.mkDerivation (finalAttrs: {
 
     mkdir -p "$out"
     cp -r src "$out/"
+    cp -r skills "$out/"
     cp package.json "$out/"
 
     runHook postInstall

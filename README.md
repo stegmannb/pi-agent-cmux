@@ -1,12 +1,14 @@
 # pi-agent-cmux
 
-A [pi coding agent](https://github.com/mariozechner/pi) extension that sends
-a native desktop notification via [cmux](https://cmux.app) when the agent
-finishes a run and is waiting for input.
+A [pi coding agent](https://github.com/mariozechner/pi) extension and skill
+bundle for [cmux](https://cmux.app) integration.
 
 ## What it does
 
-Tracks each agent run and builds a context-aware notification:
+### Extension — automatic run notifications
+
+Tracks each agent run and sends a native desktop notification via cmux when
+the agent finishes and is waiting for input:
 
 - **Updated 3 files in 2m 30s** — when files were changed
 - **Reviewed auth.ts** — when files were only read
@@ -15,6 +17,17 @@ Tracks each agent run and builds a context-aware notification:
 - **Error** — when the agent encountered an error
 
 If cmux is not found in the path, the extension disables itself silently.
+
+### Skills — in-task cmux control
+
+Three passive skills that the agent loads automatically to interact with cmux
+during a task:
+
+| Skill | Description |
+|---|---|
+| `cmux-notify` | Send desktop notifications and update sidebar status pills during builds, tests, and deploys |
+| `cmux-sidebar` | Drive progress bars and structured log entries in the workspace sidebar for multi-step tasks |
+| `cmux-browser` | Open and control the embedded WebKit browser pane for frontend preview, form testing, and screenshots |
 
 ## Configuration
 
@@ -52,8 +65,9 @@ inputs.pi-agent-cmux.url = "github:stegmannb/pi-agent-cmux";
   export { default } from "${inputs.pi-agent-cmux.packages.${system}.default}/src/index.ts";
 '';
 
-# To configure via settings.json:
+# Skills are wired via settings.json:
 "settings.json".text = builtins.toJSON {
+  skills = [ "${inputs.pi-agent-cmux.packages.${system}.default}/skills" ];
   cmux = {
     notifyLevel = "medium";
     thresholdMs = 10000;
