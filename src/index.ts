@@ -86,6 +86,7 @@ export default function (pi: ExtensionAPI): void {
   });
 
   pi.on("agent_end", async (event) => {
+    sidebar.clearAll();
     const notification = buildNotification(stats, event.messages, config);
     if (!isNotifiable(config.notifyLevel, notification.subtitle)) return;
     await sendNotification(notification.subtitle, notification.body);

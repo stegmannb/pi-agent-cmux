@@ -48,6 +48,13 @@ function getPattern(args: Record<string, unknown>): string | undefined {
   return typeof p === "string" && p.length > 0 ? p : undefined;
 }
 
+function isCdOnlyCommand(cmd: string): boolean {
+  const trimmed = cmd.trim();
+  // Skip if there are chained commands after the cd
+  if (/[;&|]|\n/.test(trimmed)) return false;
+  return trimmed === "cd" || trimmed.startsWith("cd ");
+}
+
 export function formatToolLabel(toolName: string, args: Record<string, unknown>): string {
   switch (toolName) {
     case "bash": {
@@ -113,6 +120,11 @@ export class CmuxSidebar {
   private readonly exec: Exec;
   private readonly config: Config;
   private readonly tasks = new Map<string, ActiveTask>();
+  /**
+   * Every key for which cmux set-status has actually been called.
+   * Used by clearAll() to guarantee cleanup even when task map is stale.
+   */
+  private readonly activeKeys = new Set<string>();
   private cmuxMissing = false;
   private thinkingStartedAt: number | undefined;
 
@@ -173,6 +185,11 @@ export class CmuxSidebar {
 
   startTool(toolCallId: string, toolName: string, args: Record<string, unknown>): void {
     if (!this.config.sidebarEnabled) return;
+    // Skip cd-only bash commands — not useful to surface
+    if (toolName === "bash") {
+      const cmd = typeof args["command"] === "string" ? args["command"] : "";
+      if (isCdOnlyCommand(cmd)) return;
+    }
     const key = `pi-tool-${toolCallId}`;
     const label = formatToolLabel(toolName, args);
     const color = toolColor(toolName);
@@ -196,14 +213,19 @@ export class CmuxSidebar {
   }
 
   clearAll(): void {
-    if (this.cmuxMissing) {
-      this.tasks.clear();
-      return;
-    }
+    // Cancel all tracked tasks (stops timers, clears pills for visible tasks).
     for (const key of Array.from(this.tasks.keys())) {
       this.cancelTask(key);
     }
     this.thinkingStartedAt = undefined;
+    // Belt-and-suspenders: explicitly clear every key we have ever set in cmux,
+    // even if the task map is already empty (races, stale state, etc.).
+    if (!this.cmuxMissing) {
+      for (const key of this.activeKeys) {
+        void this.cmuxClearStatus(key);
+      }
+    }
+    this.activeKeys.clear();
   }
 
   /** Call once a ENOENT/not-found result is detected to permanently disable. */
@@ -264,6 +286,7 @@ export class CmuxSidebar {
 
   private async cmuxSetStatus(key: string, label: string, color: string): Promise<void> {
     if (this.cmuxMissing) return;
+    this.activeKeys.add(key);
     const result = await this.exec(
       this.config.cmuxBinary,
       ["set-status", key, label, "--color", color],
