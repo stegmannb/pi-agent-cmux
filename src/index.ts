@@ -2,6 +2,7 @@ import type { ExtensionAPI } from "@mariozechner/pi-coding-agent";
 import { loadConfig } from "./config.ts";
 import { buildNotification, isNotifiable } from "./notify.ts";
 import { CmuxSidebar } from "./sidebar.ts";
+import { SubagentSidebar } from "./subagent-sidebar.ts";
 import { applyToolResult, emptyStats } from "./tracker.ts";
 import type { RunStats } from "./tracker.ts";
 
@@ -21,6 +22,14 @@ export default function (pi: ExtensionAPI): void {
   let cmuxMissing = false;
 
   const sidebar = new CmuxSidebar(pi.exec.bind(pi), config);
+
+  // Subagent lifecycle tracking (integrates with pi-agent-subagents events)
+  const subagentSidebar = new SubagentSidebar(
+    pi.exec.bind(pi),
+    config,
+    sendNotification,
+  );
+  subagentSidebar.bind(pi.events);
 
   async function sendNotification(subtitle: string, body: string): Promise<void> {
     if (cmuxMissing) return;
@@ -42,6 +51,7 @@ export default function (pi: ExtensionAPI): void {
       if (stderr.includes("not found") || stderr.includes("ENOENT")) {
         cmuxMissing = true;
         sidebar.markMissing();
+        subagentSidebar.markMissing();
       }
       return;
     }
@@ -90,5 +100,9 @@ export default function (pi: ExtensionAPI): void {
     const notification = buildNotification(stats, event.messages, config);
     if (!isNotifiable(config.notifyLevel, notification.subtitle)) return;
     await sendNotification(notification.subtitle, notification.body);
+  });
+
+  pi.on("session_shutdown", () => {
+    subagentSidebar.dispose();
   });
 }
