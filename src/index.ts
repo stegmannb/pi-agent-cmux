@@ -55,13 +55,18 @@ export default function (pi: ExtensionAPI): void {
     sidebar.clearAll();
   });
 
+  pi.on("message_start", () => {
+    sidebar.startMessage();
+  });
+
   pi.on("message_update", (event) => {
-    const ae = event.assistantMessageEvent;
-    if (ae.type === "thinking_start") {
-      sidebar.startThinking();
-    } else if (ae.type === "thinking_end") {
-      sidebar.stopThinking();
+    if (event.assistantMessageEvent.type === "thinking_start") {
+      sidebar.upgradeToThinking();
     }
+  });
+
+  pi.on("message_end", () => {
+    sidebar.stopMessage();
   });
 
   pi.on("tool_execution_start", (event) => {

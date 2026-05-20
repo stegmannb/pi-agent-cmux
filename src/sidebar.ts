@@ -125,13 +125,36 @@ export class CmuxSidebar {
   // Public API
   // -------------------------------------------------------------------------
 
-  startThinking(): void {
+  /**
+   * Called when the LLM starts generating a message (message_start).
+   * Shows a generic "Generating" pill that can later be upgraded to "Thinking"
+   * if a thinking block is detected.
+   */
+  startMessage(): void {
     if (!this.config.sidebarEnabled) return;
     this.thinkingStartedAt = Date.now();
-    this.scheduleTask(THINKING_KEY, "🧠 Thinking…", "#f59e0b");
+    this.scheduleTask(THINKING_KEY, "💭 Generating…", "#f59e0b");
   }
 
-  stopThinking(): void {
+  /**
+   * Called when a thinking block starts within a message (thinking_start).
+   * Upgrades the pill label in-place if it is already visible.
+   */
+  upgradeToThinking(): void {
+    if (!this.config.sidebarEnabled) return;
+    const task = this.tasks.get(THINKING_KEY);
+    if (!task) return;
+    // Update label so future set-status calls use the new text.
+    (task as { label: string }).label = "🧠 Thinking…";
+    if (task.visible) {
+      void this.cmuxSetStatus(THINKING_KEY, "🧠 Thinking…", "#f59e0b");
+    }
+  }
+
+  /**
+   * Called when the LLM message ends (message_end).
+   */
+  stopMessage(): void {
     if (!this.config.sidebarEnabled) return;
     const startedAt = this.thinkingStartedAt;
     this.thinkingStartedAt = undefined;
@@ -144,7 +167,7 @@ export class CmuxSidebar {
     this.cancelTask(THINKING_KEY);
 
     if (wasVisible && elapsed !== undefined) {
-      void this.cmuxLog("progress", "think", `Thinking: ${formatDuration(elapsed)}`);
+      void this.cmuxLog("progress", "llm", `${task.label.replace("…", "")} ${formatDuration(elapsed)}`);
     }
   }
 
