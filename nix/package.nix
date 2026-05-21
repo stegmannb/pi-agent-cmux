@@ -43,10 +43,15 @@ stdenv.mkDerivation (finalAttrs: {
   installPhase = ''
     runHook preInstall
 
-    mkdir -p "$out"
-    cp -r src "$out/"
-    cp -r skills "$out/"
-    cp package.json "$out/"
+    mkdir -p "$out/pi-cmux"
+    cp -r src "$out/pi-cmux/"
+    cp -r skills "$out/pi-cmux/"
+    cp package.json "$out/pi-cmux/"
+
+    # Root entry point expected by pi at $out/pi-cmux/index.ts
+    cat > "$out/pi-cmux/index.ts" <<'EOF'
+export { default } from "./src/index.ts";
+EOF
 
     runHook postInstall
   '';
