@@ -41,11 +41,6 @@ stdenv.mkDerivation (finalAttrs: {
     mkdir -p "$out/pi-cmux"
     cp -r . "$out/pi-cmux/"
 
-    # Root entry point expected by pi at $out/pi-cmux/index.ts
-    cat > "$out/pi-cmux/index.ts" <<'EOF'
-export { default } from "./src/index.ts";
-EOF
-
     runHook postInstall
   '';
 
