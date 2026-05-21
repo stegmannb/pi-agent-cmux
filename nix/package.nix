@@ -38,8 +38,8 @@ stdenv.mkDerivation (finalAttrs: {
   installPhase = ''
     runHook preInstall
 
-    mkdir -p "$out/pi-cmux"
-    cp -r . "$out/pi-cmux/"
+    mkdir -p "$out/cmux"
+    cp -r . "$out/cmux/"
 
     runHook postInstall
   '';

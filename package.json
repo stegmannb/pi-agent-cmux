@@ -1,5 +1,5 @@
 {
-  "name": "pi-agent-cmux",
+  "name": "pi-cmux",
   "version": "0.1.0",
   "description": "cmux integration for the pi coding agent",
   "keywords": [
