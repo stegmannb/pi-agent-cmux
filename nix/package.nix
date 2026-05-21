@@ -13,12 +13,7 @@ stdenv.mkDerivation (finalAttrs: {
   pname = packageJson.name;
   version = packageJson.version;
 
-  src = lib.cleanSourceWith {
-    src = lib.cleanSource ../.;
-    filter =
-      path: _type:
-      !(lib.hasInfix "/node_modules/" path) && !(lib.hasSuffix "/node_modules" path);
-  };
+  src = lib.cleanSource ../.;
 
   pnpmDeps = fetchPnpmDeps {
     inherit (finalAttrs) pname version src;
@@ -44,9 +39,7 @@ stdenv.mkDerivation (finalAttrs: {
     runHook preInstall
 
     mkdir -p "$out/pi-cmux"
-    cp -r src "$out/pi-cmux/"
-    cp -r skills "$out/pi-cmux/"
-    cp package.json "$out/pi-cmux/"
+    cp -r . "$out/pi-cmux/"
 
     # Root entry point expected by pi at $out/pi-cmux/index.ts
     cat > "$out/pi-cmux/index.ts" <<'EOF'
