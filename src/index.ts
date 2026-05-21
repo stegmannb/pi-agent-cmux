@@ -103,6 +103,7 @@ export default function (pi: ExtensionAPI): void {
   });
 
   pi.on("session_shutdown", () => {
+    sidebar.clearAll();
     subagentSidebar.dispose();
   });
 }

@@ -59,27 +59,27 @@ export function formatToolLabel(toolName: string, args: Record<string, unknown>)
   switch (toolName) {
     case "bash": {
       const cmd = typeof args["command"] === "string" ? args["command"].trimStart() : "";
-      return `⚡ bash: ${truncateCmd(cmd)}`;
+      return `⚡ ${truncateCmd(cmd)}`;
     }
     case "read": {
       const p = getPath(args);
-      return p ? `📄 read: ${basename(p)}` : "📄 read";
+      return p ? `📄 ${basename(p)}` : "📄";
     }
     case "edit": {
       const p = getPath(args);
-      return p ? `✏️  edit: ${basename(p)}` : "✏️  edit";
+      return p ? `✏️  ${basename(p)}` : "✏️";
     }
     case "write": {
       const p = getPath(args);
-      return p ? `💾 write: ${basename(p)}` : "💾 write";
+      return p ? `💾 ${basename(p)}` : "💾";
     }
     case "grep": {
       const pat = getPattern(args);
-      return pat ? `🔍 grep: ${truncateCmd(pat)}` : "🔍 grep";
+      return pat ? `🔍 ${truncateCmd(pat)}` : "🔍";
     }
     case "find": {
       const p = getPath(args);
-      return p ? `🔍 find: ${basename(p)}` : "🔍 find";
+      return p ? `🔍 ${basename(p)}` : "🔍";
     }
     default:
       return `🔧 ${toolName}`;
