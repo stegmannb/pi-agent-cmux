@@ -38,10 +38,8 @@ stdenv.mkDerivation (finalAttrs: {
   installPhase = ''
     runHook preInstall
 
-    mkdir -p "$out"
-    cp -r src "$out/"
-    cp -r skills "$out/"
-    cp package.json "$out/"
+    mkdir -p "$out/cmux"
+    cp -r . "$out/cmux/"
 
     runHook postInstall
   '';
