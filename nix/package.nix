@@ -5,6 +5,7 @@
   pnpm,
   pnpmConfigHook,
   fetchPnpmDeps,
+  jq,
 }:
 let
   packageJson = builtins.fromJSON (builtins.readFile ../package.json);
@@ -25,6 +26,7 @@ stdenv.mkDerivation (finalAttrs: {
     nodejs
     pnpm
     pnpmConfigHook
+    jq
   ];
 
   # No runtime npm dependencies — only install devDeps for the type-check
@@ -42,6 +44,14 @@ stdenv.mkDerivation (finalAttrs: {
     cp -r . "$out/cmux/"
 
     runHook postInstall
+  '';
+
+  postInstall = ''
+    mkdir -p "$out/cmux"
+    echo 'export { default } from "../src/index.ts";' > "$out/cmux/index.ts"
+
+    jq '.pi.extensions = ["./cmux/index.ts"]' "$out/package.json" > "$out/package.json.tmp"
+    mv "$out/package.json.tmp" "$out/package.json"
   '';
 
   meta = {
