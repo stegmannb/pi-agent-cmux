@@ -30,8 +30,8 @@
     "fmt": "oxfmt src/ index.ts",
     "lint": "oxlint src/ index.ts",
     "check": "tsc --noEmit",
-    "ci:fmt": "oxfmt --check src/ index.ts",
-    "ci:lint": "pnpm run lint",
+    "ci:fmt": "node .forgejo/ci/run-oxc.mjs oxfmt --check src/ index.ts",
+    "ci:lint": "node .forgejo/ci/run-oxc.mjs oxlint src/ index.ts",
     "ci:check": "pnpm run check",
     "test": "node --test src/*.test.ts"
   },
