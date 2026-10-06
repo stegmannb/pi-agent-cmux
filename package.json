@@ -32,7 +32,8 @@
     "check": "tsc --noEmit",
     "ci:fmt": "oxfmt --check src/ index.ts",
     "ci:lint": "pnpm run lint",
-    "ci:check": "pnpm run check"
+    "ci:check": "pnpm run check",
+    "test": "node --test src/*.test.ts"
   },
   "peerDependencies": {
     "@mariozechner/pi-coding-agent": "^0.72.0"

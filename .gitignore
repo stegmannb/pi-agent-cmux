@@ -4,3 +4,6 @@
 .pi/
 node_modules/
 result
+
+__pycache__/
+*.pyc

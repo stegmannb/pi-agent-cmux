@@ -101,7 +101,10 @@ export function loadConfig(): Config {
     cmuxBinary: isNonEmptyString(process.env["CMUX_BINARY"])
       ? (process.env["CMUX_BINARY"] as string)
       : DEFAULTS.cmuxBinary,
-    sidebarEnabled: typeof s["sidebarEnabled"] === "boolean" ? s["sidebarEnabled"] : DEFAULTS.sidebarEnabled,
-    sidebarThresholdMs: isPositiveNumber(s["sidebarThresholdMs"]) ? s["sidebarThresholdMs"] : DEFAULTS.sidebarThresholdMs,
+    sidebarEnabled:
+      typeof s["sidebarEnabled"] === "boolean" ? s["sidebarEnabled"] : DEFAULTS.sidebarEnabled,
+    sidebarThresholdMs: isPositiveNumber(s["sidebarThresholdMs"])
+      ? s["sidebarThresholdMs"]
+      : DEFAULTS.sidebarThresholdMs,
   };
 }

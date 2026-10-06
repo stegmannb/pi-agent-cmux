@@ -24,11 +24,7 @@ export default function (pi: ExtensionAPI): void {
   const sidebar = new CmuxSidebar(pi.exec.bind(pi), config);
 
   // Subagent lifecycle tracking (integrates with pi-agent-subagents events)
-  const subagentSidebar = new SubagentSidebar(
-    pi.exec.bind(pi),
-    config,
-    sendNotification,
-  );
+  const subagentSidebar = new SubagentSidebar(pi.exec.bind(pi), config, sendNotification);
   subagentSidebar.bind(pi.events);
 
   async function sendNotification(subtitle: string, body: string): Promise<void> {

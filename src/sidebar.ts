@@ -185,7 +185,11 @@ export class CmuxSidebar {
     this.cancelTask(this.thinkingKey);
 
     if (wasVisible && elapsed !== undefined) {
-      void this.cmuxLog("progress", "llm", `${task.label.replace("…", "")} ${formatDuration(elapsed)}`);
+      void this.cmuxLog(
+        "progress",
+        "llm",
+        `${task.label.replace("…", "")} ${formatDuration(elapsed)}`,
+      );
     }
   }
 
@@ -303,11 +307,9 @@ export class CmuxSidebar {
 
   private async cmuxClearStatus(key: string): Promise<void> {
     if (this.cmuxMissing) return;
-    const result = await this.exec(
-      this.config.cmuxBinary,
-      ["clear-status", key],
-      { timeout: EXEC_TIMEOUT_MS },
-    );
+    const result = await this.exec(this.config.cmuxBinary, ["clear-status", key], {
+      timeout: EXEC_TIMEOUT_MS,
+    });
     this.handleResult(result);
   }
 

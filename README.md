@@ -93,3 +93,7 @@ pnpm run check      # type-check
 pnpm run lint       # lint
 pnpm run fmt        # format
 ```
+
+## Protected synchronization
+
+See [the Tier-1 PR and synchronization contract](docs/repository-sync.md).

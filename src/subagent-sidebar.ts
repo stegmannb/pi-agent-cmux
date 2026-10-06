@@ -11,11 +11,7 @@
 import type { ExecResult } from "@mariozechner/pi-coding-agent";
 import type { Config } from "./config.ts";
 
-type Exec = (
-  bin: string,
-  args: string[],
-  opts?: { timeout?: number },
-) => Promise<ExecResult>;
+type Exec = (bin: string, args: string[], opts?: { timeout?: number }) => Promise<ExecResult>;
 
 type Events = {
   on(event: string, handler: (payload: any) => void): () => void;
@@ -58,10 +54,7 @@ export class SubagentSidebar {
   constructor(
     exec: Exec,
     config: Config,
-    private readonly sendNotification: (
-      subtitle: string,
-      body: string,
-    ) => Promise<void>,
+    private readonly sendNotification: (subtitle: string, body: string) => Promise<void>,
   ) {
     this.exec = exec;
     this.config = config;
@@ -76,15 +69,9 @@ export class SubagentSidebar {
    */
   bind(events: Events): void {
     this.unsubscribers.push(
-      events.on("subagents:started", (e: SubagentEvent) =>
-        this.onStarted(e),
-      ),
-      events.on("subagents:completed", (e: SubagentEvent) =>
-        this.onCompleted(e),
-      ),
-      events.on("subagents:failed", (e: SubagentEvent) =>
-        this.onFailed(e),
-      ),
+      events.on("subagents:started", (e: SubagentEvent) => this.onStarted(e)),
+      events.on("subagents:completed", (e: SubagentEvent) => this.onCompleted(e)),
+      events.on("subagents:failed", (e: SubagentEvent) => this.onFailed(e)),
     );
   }
 
@@ -118,11 +105,7 @@ export class SubagentSidebar {
     });
 
     this.updateStatusPill();
-    void this.cmuxLog(
-      "progress",
-      "agent",
-      `▸ ${e.description} (${e.type})`,
-    );
+    void this.cmuxLog("progress", "agent", `▸ ${e.description} (${e.type})`);
   }
 
   private onCompleted(e: SubagentEvent): void {
@@ -139,10 +122,7 @@ export class SubagentSidebar {
     const durationSuffix = duration ? ` (${duration})` : "";
 
     void this.cmuxLog("success", "agent", `✓ ${desc}${durationSuffix}`);
-    void this.sendNotification(
-      "✓ Agent Done",
-      `${desc}${durationSuffix}`,
-    );
+    void this.sendNotification("✓ Agent Done", `${desc}${durationSuffix}`);
   }
 
   private onFailed(e: SubagentEvent): void {
@@ -169,11 +149,7 @@ export class SubagentSidebar {
     }
   }
 
-  private async cmuxSetStatus(
-    key: string,
-    label: string,
-    color: string,
-  ): Promise<void> {
+  private async cmuxSetStatus(key: string, label: string, color: string): Promise<void> {
     if (this.cmuxMissing) return;
     const result = await this.exec(
       this.config.cmuxBinary,
@@ -185,11 +161,9 @@ export class SubagentSidebar {
 
   private async cmuxClearStatus(key: string): Promise<void> {
     if (this.cmuxMissing) return;
-    const result = await this.exec(
-      this.config.cmuxBinary,
-      ["clear-status", key],
-      { timeout: EXEC_TIMEOUT_MS },
-    );
+    const result = await this.exec(this.config.cmuxBinary, ["clear-status", key], {
+      timeout: EXEC_TIMEOUT_MS,
+    });
     this.handleResult(result);
   }
 
